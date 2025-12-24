@@ -24,7 +24,6 @@ Interface Web
   - 🗑️ Vider toute la file d'attente
 - **File d'attente live** : Visualisez les vidéos en attente en temps réel
 - **Statistiques** : Suivez l'utilisation du serveur (salles, vidéos, stockage)
-- **Design dark mode** : Interface élégante et moderne
 
 Serveur
 - **WebSocket temps réel** : Synchronisation instantanée entre tous les clients
