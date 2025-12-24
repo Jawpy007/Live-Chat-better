@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Overlay Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #191919;
+            color: #E3E2E0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background-color: #0F0F0F;
+            border-bottom: 1px solid #2F2F2F;
+            padding: 30px 40px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #E3E2E0;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #9B9A97;
+            font-size: 15px;
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 12px;
+        }
+        
+        .status-badge.connected {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #22C55E;
+        }
+        
+        .status-badge.disconnected {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+        }
+        
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            background-color: #0F0F0F;
+            border: 1px solid #2F2F2F;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #9B9A97;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+        
+        /* Form Inputs */
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            background-color: #2F2F2F;
+            border: 1px solid #3F3F3F;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #E3E2E0;
+            font-size: 15px;
+            margin-bottom: 12px;
+            transition: border 0.2s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #2383E2;
+        }
+        
+        input[type="text"]::placeholder {
+            color: #6F6F6F;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background-color: #2383E2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1A6DC1;
+        }
+        
+        .btn-success {
+            background-color: #22C55E;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #16A34A;
+        }
+        
+        .btn-danger {
+            background-color: #EF4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #DC2626;
+        }
+        
+        .btn-secondary {
+            background-color: #3F3F3F;
+            color: #E3E2E0;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4F4F4F;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+        
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed #3F3F3F;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #1A1A1A;
+            margin-bottom: 16px;
+        }
+        
+        .drop-zone:hover {
+            border-color: #2383E2;
+            background-color: #1F1F1F;
+        }
+        
+        .drop-zone.active {
+            border-color: #2383E2;
+            background-color: rgba(35, 131, 226, 0.1);
+        }
+        
+        .drop-zone h3 {
+            color: #E3E2E0;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .drop-zone p {
+            color: #9B9A97;
+            font-size: 14px;
+        }
+        
+        /* Progress Bar */
+        .progress {
+            width: 100%;
+            height: 8px;
+            background-color: #2F2F2F;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #2383E2;
+            transition: width 0.3s;
+        }
+        
+        /* Queue */
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .queue-count {
+            font-size: 15px;
+            color: #9B9A97;
+        }
+        
+        .queue-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .video-item {
+            background-color: #1A1A1A;
+            border: 1px solid #2F2F2F;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .video-item:hover {
+            border-color: #3F3F3F;
+            background-color: #1F1F1F;
+        }
+        
+        .video-item:first-child {
+            border-color: #2383E2;
+        }
+        
+        .video-info {
+            flex: 1;
+        }
+        
+        .video-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .video-badge.file {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #22C55E;
+        }
+        
+        .video-badge.youtube {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+        }
+        
+        .video-badge.url {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #3B82F6;
+        }
+        
+        .video-badge.playing {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #F59E0B;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .video-title {
+            color: #E3E2E0;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        
+        .video-meta {
+            color: #6F6F6F;
+            font-size: 13px;
+        }
+        
+        /* Status Messages */
+        .alert {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: #22C55E;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .alert-error {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .alert-info {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background-color: #1A1A1A;
+            border: 1px solid #2F2F2F;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2383E2;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            color: #9B9A97;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6F6F6F;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state-text {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state-hint {
+            font-size: 14px;
+            color: #4F4F4F;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div>
+                <h1>
+                    Video Overlay Control Panel
+                    <span class="status-badge disconnected" id="statusBadge">🔴 Déconnecté</span>
+                </h1>
+                <p>Gérez vos vidéos synchronisées en temps réel</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container">
+            <!-- Section Connexion -->
+            <div class="section">
+                <div class="section-title">🔗 Connexion</div>
+                <input type="text" id="roomId" placeholder="ID de la salle" value="test">
+                <input type="text" id="username" placeholder="Votre nom" value="Anonyme">
+                <button class="btn btn-primary" onclick="connect()" style="width: 100%;">Se connecter</button>
+                <div id="connectStatus"></div>
+            </div>
+
+            <!-- Section Upload -->
+            <div class="section">
+                <div class="section-title">📤 Uploader une vidéo</div>
+                <div class="drop-zone" id="dropZone">
+                    <h3>📁 Glissez une vidéo ici</h3>
+                    <p>ou cliquez pour choisir (MP4, AVI, MOV, MKV, WEBM - max 500 MB)</p>
+                </div>
+                <input type="file" id="fileInput" accept="video/*" style="display: none;">
+                <div class="progress" id="uploadProgress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div id="uploadStatus"></div>
+            </div>
+
+            <!-- Section URL -->
+            <div class="section">
+                <div class="section-title">🔗 Ajouter une URL</div>
+                <input type="text" id="videoUrl" placeholder="https://example.com/video.mp4">
+                <button class="btn btn-primary" onclick="addUrl()" style="width: 100%;">Ajouter l'URL</button>
+                <div id="urlStatus"></div>
+            </div>
+
+            <!-- Section Contrôles -->
+            <div class="section">
+                <div class="section-title">🎮 Contrôles</div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="skipVideo()">⏭️ Skip vidéo</button>
+                    <button class="btn btn-danger" onclick="clearQueue()">🗑️ Vider la queue</button>
+                </div>
+            </div>
+
+            <!-- Section File d'attente -->
+            <div class="section">
+                <div class="queue-header">
+                    <div>
+                        <div class="section-title" style="margin: 0;">📋 File d'attente</div>
+                        <div class="queue-count"><span id="queueCount">0</span> vidéo(s)</div>
+                    </div>
+                </div>
+                <div id="queueList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎬</div>
+                        <div class="empty-state-text">Aucune vidéo en attente</div>
+                        <div class="empty-state-hint">Uploadez une vidéo pour commencer</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Stats -->
+            <div class="section">
+                <div class="section-title">📊 Statistiques</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statRooms">-</div>
+                        <div class="stat-label">Salles actives</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statVideos">-</div>
+                        <div class="stat-label">Vidéos en queue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statStorage">-</div>
+                        <div class="stat-label">Stockage (MB)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let roomId = 'test';
+        let username = 'Anonyme';
+        let isConnected = false;
+
+        // Utilitaire: Afficher un message
+        function showMessage(elementId, message, type = 'info') {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => el.innerHTML = '', 5000);
+        }
+
+        // Connexion WebSocket
+        function connect() {
+            roomId = document.getElementById('roomId').value.trim() || 'test';
+            username = document.getElementById('username').value.trim() || 'Anonyme';
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                showMessage('connectStatus', '⚠️ Déjà connecté', 'info');
+                return;
+            }
+
+            showMessage('connectStatus', '🔄 Connexion en cours...', 'info');
+
+            ws = new WebSocket('ws://' + window.location.hostname + ':8765');
+
+            ws.onopen = () => {
+                isConnected = true;
+                document.getElementById('statusBadge').textContent = '🟢 Connecté';
+                document.getElementById('statusBadge').className = 'status-badge connected';
+                showMessage('connectStatus', '✅ Connecté avec succès!', 'success');
+                ws.send(JSON.stringify({ action: 'join', room_id: roomId }));
+                loadStats();
+                setInterval(loadStats, 10000); // Refresh stats every 10s
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('Message reçu:', data);
+                
+                if (data.queue !== undefined) {
+                    updateQueue(data.queue);
+                }
+            };
+
+            ws.onerror = () => {
+                isConnected = false;
+                document.getElementById('statusBadge').textContent = '🔴 Erreur';
+                document.getElementById('statusBadge').className = 'status-badge disconnected';
+                showMessage('connectStatus', '❌ Erreur de connexion', 'error');
+            };
+
+            ws.onclose = () => {
+                isConnected = false;
+                document.getElementById('statusBadge').textContent = '🔴 Déconnecté';
+                document.getElementById('statusBadge').className = 'status-badge disconnected';
+                showMessage('connectStatus', '🔌 Déconnecté', 'info');
+            };
+        }
+
+        // Mise à jour de la queue
+        function updateQueue(queue) {
+            const queueList = document.getElementById('queueList');
+            const queueCount = document.getElementById('queueCount');
+            
+            queueCount.textContent = queue.length;
+
+            if (queue.length === 0) {
+                queueList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎬</div>
+                        <div class="empty-state-text">Aucune vidéo en attente</div>
+                        <div class="empty-state-hint">Uploadez une vidéo pour commencer</div>
+                    </div>
+                `;
+                return;
+            }
+
+            queueList.innerHTML = queue.map((video, index) => {
+                const typeClass = video.type;
+                const typeIcon = video.type === 'youtube' ? '📺' : video.type === 'file' ? '📹' : '🔗';
+                const name = video.originalName || video.url;
+                const shortName = name.length > 60 ? name.substring(0, 60) + '...' : name;
+                const playingBadge = index === 0 ? '<span class="video-badge playing">▶️ EN LECTURE</span>' : '';
+
+                return `
+                    <div class="video-item">
+                        <div class="video-info">
+                            ${playingBadge}
+                            <span class="video-badge ${typeClass}">${typeIcon} ${video.type.toUpperCase()}</span>
+                            <div class="video-title">#${index + 1} - ${shortName}</div>
+                            <div class="video-meta">Par ${video.addedBy}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Upload fichier
+        function uploadFile(file) {
+            if (!isConnected) {
+                showMessage('uploadStatus', '❌ Connectez-vous d\'abord', 'error');
+                return;
+            }
+
+            if (!file || file.size > 500 * 1024 * 1024) {
+                showMessage('uploadStatus', '❌ Fichier invalide ou trop volumineux', 'error');
+                return;
+            }
+
+            showMessage('uploadStatus', `📤 Upload de ${file.name}...`, 'info');
+            document.getElementById('uploadProgress').style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('video', file);
+            formData.append('room_id', roomId);
+            formData.append('added_by', username);
+
+            const xhr = new XMLHttpRequest();
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    document.getElementById('progressBar').style.width = percent + '%';
+                }
+            };
+
+            xhr.onload = () => {
+                document.getElementById('uploadProgress').style.display = 'none';
+                if (xhr.status === 200) {
+                    showMessage('uploadStatus', '✅ Vidéo uploadée!', 'success');
+                    document.getElementById('fileInput').value = '';
+                } else {
+                    showMessage('uploadStatus', '❌ Erreur d\'upload', 'error');
+                }
+            };
+
+            xhr.onerror = () => {
+                document.getElementById('uploadProgress').style.display = 'none';
+                showMessage('uploadStatus', '❌ Erreur réseau', 'error');
+            };
+
+            xhr.open('POST', '/api/upload');
+            xhr.send(formData);
+        }
+
+        // Ajouter URL
+        function addUrl() {
+            if (!isConnected) {
+                showMessage('urlStatus', '❌ Connectez-vous d\'abord', 'error');
+                return;
+            }
+
+            const url = document.getElementById('videoUrl').value.trim();
+            if (!url) {
+                showMessage('urlStatus', '❌ Entrez une URL', 'error');
+                return;
+            }
+
+            showMessage('urlStatus', '📤 Ajout de l\'URL...', 'info');
+
+            fetch('/api/add_url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, room_id: roomId, added_by: username })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('urlStatus', '✅ URL ajoutée!', 'success');
+                    document.getElementById('videoUrl').value = '';
+                } else {
+                    showMessage('urlStatus', '❌ ' + data.error, 'error');
+                }
+            })
+            .catch(() => showMessage('urlStatus', '❌ Erreur réseau', 'error'));
+        }
+
+        // Skip vidéo
+        function skipVideo() {
+            if (!isConnected) {
+                alert('Connectez-vous d\'abord');
+                return;
+            }
+
+            if (!confirm('⏭️ Voulez-vous passer à la vidéo suivante ?')) return;
+
+            fetch(`/api/rooms/${roomId}/skip`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('connectStatus', '⏭️ Vidéo skippée', 'success');
+                    }
+                });
+        }
+
+        // Vider la queue
+        function clearQueue() {
+            if (!isConnected) {
+                alert('Connectez-vous d\'abord');
+                return;
+            }
+
+            if (!confirm('🗑️ Voulez-vous vraiment vider toute la file d\'attente ?')) return;
+
+            fetch(`/api/rooms/${roomId}/clear`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('connectStatus', '🗑️ Queue vidée', 'success');
+                        updateQueue([]);
+                    }
+                });
+        }
+
+        // Charger les stats
+        function loadStats() {
+            fetch('/api/stats')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('statRooms').textContent = data.rooms || '-';
+                    document.getElementById('statVideos').textContent = data.total_videos_queued || '-';
+                    document.getElementById('statStorage').textContent = data.storage_used_mb || '-';
+                });
+        }
+
+        // Drag & Drop
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => e.target.files[0] && uploadFile(e.target.files[0]);
+
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        };
+
+        dropZone.ondragleave = () => dropZone.classList.remove('active');
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            e.dataTransfer.files[0] && uploadFile(e.dataTransfer.files[0]);
+        };
+
+        // Raccourcis clavier
+        document.getElementById('videoUrl').onkeypress = (e) => {
+            if (e.key === 'Enter') addUrl();
+        };
+    </script>
+</body>
+</html>
