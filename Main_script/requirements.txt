@@ -1,0 +1,6 @@
+flask==3.0.0
+flask-cors==4.0.0
+websockets==12.0
+PyQt5==5.15.10
+requests==2.31.0
+pywin32==306
